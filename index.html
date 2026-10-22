@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Parejas Neón: juego de memoria de Nexar Sistemas.">
+  <title>Parejas Neón · Nexar Sistemas</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080e1c;--surface:#111b30;--surface2:#19243c;--text:#f3f7ff;--muted:#9aaac8;--cyan:#43e4f5;--pink:#ff5bbc;--violet:#a88bff;--good:#5af0ac}
+    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100dvh;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% -15%,#203969 0%,transparent 52%),radial-gradient(ellipse at 100% 85%,#261039 0%,transparent 42%),var(--bg)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    .shell{width:min(100%,540px);min-height:100dvh;margin:auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(25px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:15px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-size:12px;letter-spacing:.17em;font-weight:900;color:#cbd8fb}.brand strong{color:var(--cyan)}.sound{border:1px solid #344767;border-radius:13px;background:#17243a;color:var(--text);height:42px;padding:0 12px;white-space:nowrap}
+    .heading{text-align:center;margin:0}.heading h1{margin:0;font-size:clamp(2rem,9vw,3rem);letter-spacing:-.055em;font-weight:900;line-height:1.13;background:linear-gradient(100deg,var(--cyan),#b3a5ff 52%,var(--pink));background-clip:text;-webkit-background-clip:text;color:transparent;text-shadow:0 0 32px #55caff28}.heading p{color:var(--muted);margin:7px 0 0;font-size:13px}
+    .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.level{border:1px solid #344664;background:#131f35;border-radius:14px;padding:10px 3px;color:var(--muted);font-weight:800;font-size:14px;min-height:60px}.level span{display:block;font-size:11px;font-weight:500;margin-top:3px}.level[aria-pressed="true"]{border-color:var(--cyan);background:#103044;color:#fff;box-shadow:inset 0 0 0 1px #43e4f545,0 0 18px #43e4f519}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{border:1px solid #293a59;background:#101b2e;border-radius:14px;padding:10px 5px;text-align:center;min-width:0}.stat .label{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}.stat .value{font-size:clamp(18px,5vw,23px);font-weight:850;font-variant-numeric:tabular-nums;margin-top:2px}.stat:nth-child(1) .value{color:var(--cyan)}.stat:nth-child(2) .value{color:var(--pink)}.stat:nth-child(3) .value{color:#c8b8ff}
+    .gamebox{border:1px solid #35446a;background:linear-gradient(145deg,#14213a,#0d172a);padding:clamp(9px,2.7vw,15px);border-radius:22px;box-shadow:0 16px 40px #0005,0 0 30px #5579d00a}.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:clamp(6px,1.8vw,10px);width:100%;margin:auto}.tile{border:0;background:transparent;padding:0;aspect-ratio:1/1;min-width:0;perspective:700px;touch-action:manipulation}.tile-inner{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.22,.75,.3,1)}.tile.is-flipped .tile-inner,.tile.is-matched .tile-inner{transform:rotateY(180deg)}.face{position:absolute;inset:0;display:grid;place-items:center;border-radius:clamp(9px,2.7vw,16px);backface-visibility:hidden;-webkit-backface-visibility:hidden}.back{background:linear-gradient(145deg,#213456,#17243d);border:1px solid #47638e;box-shadow:inset 0 0 13px #38e7fa14}.back::after{content:'✦';font-size:clamp(21px,6.6vw,38px);color:var(--cyan);text-shadow:0 0 13px #43e4f5aa}.front{transform:rotateY(180deg);font-size:clamp(24px,7.6vw,39px);background:linear-gradient(150deg,#293453,#1a2441);border:1px solid #8b83d1;box-shadow:inset 0 0 16px #b9a5ff20}.tile.is-matched .front{background:linear-gradient(140deg,#153b43,#15342f);border:1px solid var(--good);box-shadow:0 0 13px #5af0ac30}.tile:disabled{cursor:default}
+    .controls{display:flex;gap:9px;align-items:stretch}.primary{flex:1;border:0;border-radius:14px;min-height:48px;background:linear-gradient(100deg,#35d9ec,#a290ff);color:#07111f;font-weight:900;box-shadow:0 4px 20px #35d9ec30}.secondary{border:1px solid #405071;background:#16243a;color:#e7eeff;padding:0 16px;border-radius:14px;font-weight:750}.record{text-align:center;color:var(--muted);font-size:13px;min-height:19px}.record strong{color:#ffdb91}.footer{margin-top:auto;text-align:center;font-size:11px;color:#7889a9;padding-top:3px}.footer b{color:#bcc8df}
+    .overlay{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;background:#050916da;backdrop-filter:blur(10px)}.overlay[hidden]{display:none}.modal{width:min(100%,380px);text-align:center;border:1px solid #577399;border-radius:23px;background:linear-gradient(155deg,#1b2a48,#121a31);padding:28px 22px;box-shadow:0 0 50px #43e4f521}.trophy{font-size:56px}.modal h2{font-size:28px;margin:6px 0;background:linear-gradient(95deg,var(--cyan),var(--pink));background-clip:text;-webkit-background-clip:text;color:transparent}.modal p{color:#c9d5ef;line-height:1.6}.modal .primary{width:100%;margin-top:8px}.new-record{color:#ffe18b;font-weight:900}
+    @media (max-width:370px){.shell{gap:11px;padding-inline:10px}.gamebox{padding:8px}.grid{gap:6px}.heading h1{font-size:2rem}.level{font-size:12px}.tile .front{font-size:clamp(20px,7vw,30px)}}
+    @media (prefers-reduced-motion:reduce){.tile-inner{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top"><div class="brand">NEXAR <strong>SISTEMAS</strong> <span aria-hidden="true">✦</span></div><button id="sound" class="sound" type="button" aria-pressed="true">🔊 Sonido</button></header>
+    <div class="heading"><h1>Parejas Neón</h1><p>Encontrá las parejas. Entrená tu memoria ✨</p></div>
+    <nav class="levels" aria-label="Dificultad"><button class="level" type="button" data-level="facil" aria-pressed="true">Fácil<span>6 parejas</span></button><button class="level" type="button" data-level="normal" aria-pressed="false">Normal<span>8 parejas</span></button><button class="level" type="button" data-level="dificil" aria-pressed="false">Difícil<span>10 parejas</span></button></nav>
+    <section class="stats" aria-label="Estadísticas"><div class="stat"><div class="label">Tiempo</div><div class="value" id="time">00:00</div></div><div class="stat"><div class="label">Movimientos</div><div class="value" id="moves">0</div></div><div class="stat"><div class="label">Parejas</div><div class="value" id="pairs">0/6</div></div></section>
+    <section class="gamebox" aria-label="Tablero de memoria"><div class="grid" id="board"></div></section>
+    <div class="controls"><button class="primary" type="button" id="restart">↻ Nueva partida</button><button class="secondary" type="button" id="how">¿Cómo jugar?</button></div>
+    <div class="record" id="record" aria-live="polite"></div>
+    <footer class="footer">Un juego de <b>Nexar Sistemas</b> · Hecho para desafiar tu memoria</footer>
+  </main>
+  <div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal"><div class="trophy" id="modal-icon" aria-hidden="true">🏆</div><h2 id="modal-title"></h2><p id="modal-copy"></p><button type="button" class="primary" id="modal-close">¡Vamos!</button></div></div>
+  <script>
+    (() => {
+      'use strict';
+      const config = {facil:{pairs:6,cols:3},normal:{pairs:8,cols:4},dificil:{pairs:10,cols:4}};
+      const symbols = ['🚀','💎','⚡','🌈','🎮','🪐','🔥','🎯','🦄','⭐'];
+      const $ = id => document.getElementById(id);
+      const board = $('board'), overlay = $('overlay');
+      let level = 'facil', deck = [], first = null, second = null, locked = false, matched = 0, moves = 0;
+      let startedAt = null, elapsed = 0, timer = null, pendingFlip = null, soundOn = true, audioCtx = null;
+      const storageKey = difficulty => `nexar-parejas-neon-record-v1-${difficulty}`;
+      const formatTime = seconds => `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;
+      const readRecord = () => {try {const value = JSON.parse(localStorage.getItem(storageKey(level)));return value && Number.isFinite(value.seconds) && Number.isFinite(value.moves) ? value : null;}catch{return null;}};
+      const saveRecord = record => {try{localStorage.setItem(storageKey(level),JSON.stringify(record));}catch{ /* La partida funciona aunque el almacenamiento esté bloqueado. */ }};
+      function playTone(frequency=500,duration=.09,type='sine'){
+        if(!soundOn)return;
+        try{
+          const Audio = window.AudioContext || window.webkitAudioContext;
+          if(!Audio)return;
+          audioCtx ||= new Audio();
+          if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+          const oscillator=audioCtx.createOscillator(),gain=audioCtx.createGain(),now=audioCtx.currentTime;
+          oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,now);
+          gain.gain.setValueAtTime(.045,now);gain.gain.exponentialRampToValueAtTime(.001,now+duration);
+          oscillator.connect(gain);gain.connect(audioCtx.destination);oscillator.start(now);oscillator.stop(now+duration);
+        }catch{/* Sin audio disponible */}
+      }
+      function stopTimer(){if(timer!==null)clearInterval(timer);timer=null;}
+      function updateClock(){if(startedAt!==null){elapsed=Math.floor((performance.now()-startedAt)/1000);$('time').textContent=formatTime(elapsed);}}
+      function stats(){ $('moves').textContent=moves; $('pairs').textContent=`${matched}/${config[level].pairs}`; }
+      function renderRecord(){const r=readRecord();$('record').innerHTML=r?`🏅 Récord: <strong>${formatTime(r.seconds)}</strong> · ${r.moves} movimientos`:'🏅 Todavía no hay récord en este nivel';}
+      function shuffle(items){for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]];}return items;}
+      function reset(){
+        stopTimer();if(pendingFlip!==null)clearTimeout(pendingFlip);pendingFlip=null;
+        first=second=null;locked=false;matched=0;moves=0;elapsed=0;startedAt=null;
+        $('time').textContent='00:00';stats();overlay.hidden=true;
+        document.querySelectorAll('.level').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.level===level)));
+        const settings=config[level];board.style.setProperty('--cols',settings.cols);
+        deck=shuffle([...Array(settings.pairs).keys(),...Array(settings.pairs).keys()]);
+        board.replaceChildren();
+        deck.forEach((symbolIndex,index)=>{
+          const tile=document.createElement('button');tile.type='button';tile.className='tile';tile.dataset.index=index;
+          tile.setAttribute('aria-label',`Ficha ${index+1}, oculta`);
+          tile.innerHTML=`<span class="tile-inner"><span class="face back" aria-hidden="true"></span><span class="face front" aria-hidden="true">${symbols[symbolIndex]}</span></span>`;
+          tile.addEventListener('click',()=>flip(tile,symbolIndex));board.appendChild(tile);
+        });
+        renderRecord();
+      }
+      function flip(tile,symbolIndex){
+        if(locked || tile.classList.contains('is-flipped') || tile.classList.contains('is-matched'))return;
+        if(startedAt===null){startedAt=performance.now();timer=setInterval(updateClock,250);}
+        tile.classList.add('is-flipped');tile.setAttribute('aria-label',`Ficha ${Number(tile.dataset.index)+1}, ${symbols[symbolIndex]}`);
+        playTone(420+symbolIndex*45);
+        if(!first){first={tile,symbolIndex};return;}
+        second={tile,symbolIndex};moves++;stats();
+        if(first.symbolIndex===second.symbolIndex){
+          first.tile.classList.add('is-matched');second.tile.classList.add('is-matched');
+          first.tile.disabled=true;second.tile.disabled=true;
+          matched++;stats();playTone(870,.16);
+          first=second=null;
+          if(matched===config[level].pairs)win();
+        }else{
+          locked=true;
+          pendingFlip=setTimeout(()=>{
+            first.tile.classList.remove('is-flipped');second.tile.classList.remove('is-flipped');
+            first.tile.setAttribute('aria-label',`Ficha ${Number(first.tile.dataset.index)+1}, oculta`);
+            second.tile.setAttribute('aria-label',`Ficha ${Number(second.tile.dataset.index)+1}, oculta`);
+            first=second=null;locked=false;pendingFlip=null;
+          },850);
+        }
+      }
+      function showModal(icon,title,message,action){$('modal-icon').textContent=icon;$('modal-title').textContent=title;$('modal-copy').innerHTML=message;$('modal-close').textContent=action;overlay.hidden=false;$('modal-close').focus();}
+      function win(){
+        updateClock();stopTimer();const old=readRecord();
+        const isRecord=!old || elapsed<old.seconds || (elapsed===old.seconds&&moves<old.moves);
+        if(isRecord)saveRecord({seconds:elapsed,moves});renderRecord();
+        playTone(1100,.3);
+        showModal('🏆','¡Tablero completo!',`Terminaste en <b>${formatTime(elapsed)}</b> con <b>${moves} movimientos</b>.<br>${isRecord?'<span class="new-record">✨ ¡Nuevo récord!</span>':'¡Muy bien jugado! 🎉'}`,'Jugar otra vez');
+      }
+      document.querySelectorAll('.level').forEach(button=>button.addEventListener('click',()=>{if(level!==button.dataset.level){level=button.dataset.level;reset();}}));
+      $('restart').addEventListener('click',reset);
+      $('sound').addEventListener('click',()=>{soundOn=!soundOn;$('sound').textContent=soundOn?'🔊 Sonido':'🔇 Silencio';$('sound').setAttribute('aria-pressed',String(soundOn));if(soundOn)playTone();});
+      $('how').addEventListener('click',()=>showModal('🧠','¿Cómo jugar?','Tocá dos fichas para descubrir sus símbolos. Si son iguales, quedan descubiertas. Encontrá todas las parejas usando la menor cantidad de movimientos y tiempo. El reloj comienza con tu primera ficha.','Entendido'));
+      $('modal-close').addEventListener('click',()=>{const wasWin=matched===config[level].pairs;overlay.hidden=true;if(wasWin)reset();});
+      reset();
+    })();
+  </script>
+</body>
+</html>
