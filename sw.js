@@ -1,4 +1,4 @@
-const CACHE = 'parejas-neon-v1.0.0';
+const CACHE = 'parejas-neon-v1.0.0-install-1';
 const PREFIX = 'parejas-neon-';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
