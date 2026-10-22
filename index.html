@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
   <meta name="description" content="Parejas Neón: juego de memoria de Nexar Sistemas.">
+  <link rel="manifest" href="./manifest.webmanifest">
   <title>Parejas Neón · Nexar Sistemas</title>
   <style>
     :root{color-scheme:dark;--bg:#080e1c;--surface:#111b30;--surface2:#19243c;--text:#f3f7ff;--muted:#9aaac8;--cyan:#43e4f5;--pink:#ff5bbc;--violet:#a88bff;--good:#5af0ac}
@@ -118,6 +119,13 @@
       $('modal-close').addEventListener('click',()=>{const wasWin=matched===config[level].pairs;overlay.hidden=true;if(wasWin)reset();});
       reset();
     })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
