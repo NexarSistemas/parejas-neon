@@ -11,7 +11,7 @@
     :root{color-scheme:dark;--bg:#080e1c;--surface:#111b30;--surface2:#19243c;--text:#f3f7ff;--muted:#9aaac8;--cyan:#43e4f5;--pink:#ff5bbc;--violet:#a88bff;--good:#5af0ac}
     *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100dvh;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% -15%,#203969 0%,transparent 52%),radial-gradient(ellipse at 100% 85%,#261039 0%,transparent 42%),var(--bg)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     .shell{width:min(100%,540px);min-height:100dvh;margin:auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(25px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:15px}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-size:12px;letter-spacing:.17em;font-weight:900;color:#cbd8fb}.brand strong{color:var(--cyan)}.sound{border:1px solid #344767;border-radius:13px;background:#17243a;color:var(--text);height:42px;padding:0 12px;white-space:nowrap}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.brand{font-size:12px;letter-spacing:.17em;font-weight:900;color:#cbd8fb}.brand strong{color:var(--cyan)}.sound{border:1px solid #344767;border-radius:13px;background:#17243a;color:var(--text);height:42px;padding:0 12px;white-space:nowrap}
     .heading{text-align:center;margin:0}.heading h1{margin:0;font-size:clamp(2rem,9vw,3rem);letter-spacing:-.055em;font-weight:900;line-height:1.13;background:linear-gradient(100deg,var(--cyan),#b3a5ff 52%,var(--pink));background-clip:text;-webkit-background-clip:text;color:transparent;text-shadow:0 0 32px #55caff28}.heading p{color:var(--muted);margin:7px 0 0;font-size:13px}
     .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.level{border:1px solid #344664;background:#131f35;border-radius:14px;padding:10px 3px;color:var(--muted);font-weight:800;font-size:14px;min-height:60px}.level span{display:block;font-size:11px;font-weight:500;margin-top:3px}.level[aria-pressed="true"]{border-color:var(--cyan);background:#103044;color:#fff;box-shadow:inset 0 0 0 1px #43e4f545,0 0 18px #43e4f519}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{border:1px solid #293a59;background:#101b2e;border-radius:14px;padding:10px 5px;text-align:center;min-width:0}.stat .label{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}.stat .value{font-size:clamp(18px,5vw,23px);font-weight:850;font-variant-numeric:tabular-nums;margin-top:2px}.stat:nth-child(1) .value{color:var(--cyan)}.stat:nth-child(2) .value{color:var(--pink)}.stat:nth-child(3) .value{color:#c8b8ff}
@@ -24,7 +24,7 @@
 </head>
 <body>
   <main class="shell">
-    <header class="top"><div class="brand">NEXAR <strong>SISTEMAS</strong> <span aria-hidden="true">✦</span></div><button id="sound" class="sound" type="button" aria-pressed="true">🔊 Sonido</button></header>
+    <header class="top"><div class="brand">NEXAR <strong>SISTEMAS</strong> <span aria-hidden="true">✦</span></div><div class="top-actions"><button id="install" class="sound" type="button" hidden>📲 Instalar</button><button id="sound" class="sound" type="button" aria-pressed="true">🔊 Sonido</button></div></header>
     <div class="heading"><h1>Parejas Neón</h1><p>Encontrá las parejas. Entrená tu memoria ✨</p></div>
     <nav class="levels" aria-label="Dificultad"><button class="level" type="button" data-level="facil" aria-pressed="true">Fácil<span>6 parejas</span></button><button class="level" type="button" data-level="normal" aria-pressed="false">Normal<span>8 parejas</span></button><button class="level" type="button" data-level="dificil" aria-pressed="false">Difícil<span>10 parejas</span></button></nav>
     <section class="stats" aria-label="Estadísticas"><div class="stat"><div class="label">Tiempo</div><div class="value" id="time">00:00</div></div><div class="stat"><div class="label">Movimientos</div><div class="value" id="moves">0</div></div><div class="stat"><div class="label">Parejas</div><div class="value" id="pairs">0/6</div></div></section>
@@ -118,6 +118,50 @@
       $('how').addEventListener('click',()=>showModal('🧠','¿Cómo jugar?','Tocá dos fichas para descubrir sus símbolos. Si son iguales, quedan descubiertas. Encontrá todas las parejas usando la menor cantidad de movimientos y tiempo. El reloj comienza con tu primera ficha.','Entendido'));
       $('modal-close').addEventListener('click',()=>{const wasWin=matched===config[level].pairs;overlay.hidden=true;if(wasWin)reset();});
       reset();
+    })();
+  </script>
+  <script>
+    (() => {
+      const button = document.getElementById('install');
+      let deferredPrompt = null;
+      let installed = false;
+      const displayMode = typeof window.matchMedia === 'function' ? window.matchMedia('(display-mode: standalone)') : null;
+      const isStandalone = () => installed || navigator.standalone === true || (displayMode && displayMode.matches);
+      if (displayMode && typeof displayMode.addEventListener === 'function') {
+        displayMode.addEventListener('change', () => {
+          if (isStandalone()) {
+            deferredPrompt = null;
+            button.hidden = true;
+          }
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', event => {
+        if (isStandalone()) return;
+        event.preventDefault();
+        deferredPrompt = event;
+        button.hidden = false;
+      });
+      button.addEventListener('click', async () => {
+        if (!deferredPrompt || isStandalone()) {
+          deferredPrompt = null;
+          button.hidden = true;
+          return;
+        }
+        const prompt = deferredPrompt;
+        deferredPrompt = null;
+        button.hidden = true;
+        try {
+          await prompt.prompt();
+        } catch {
+          // El juego sigue disponible si no se puede mostrar el diálogo.
+        }
+      });
+      window.addEventListener('appinstalled', () => {
+        installed = true;
+        deferredPrompt = null;
+        button.hidden = true;
+      });
     })();
   </script>
   <script>
